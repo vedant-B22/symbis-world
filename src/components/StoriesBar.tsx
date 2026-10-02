@@ -1,41 +1,68 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import { StoryGroup } from '../types';
 import { useApp } from '../context/AppContext';
+import { LazyImage } from './LazyImage';
 
 export const StoriesBar: React.FC = () => {
   const { stories, openStory, currentUser, setIsCreateOpen } = useApp();
 
+  // Find user's own stories if they exist
+  const userStoryGroup = stories.find(s => s.userId === currentUser.id);
+  const otherStories = stories.filter(s => s.userId !== currentUser.id);
+
   return (
-    <div className="w-full bg-white dark:bg-zinc-900/60 rounded-3xl p-3.5 mb-5 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
-      <div className="flex items-center gap-4 overflow-x-auto no-scrollbar scroll-smooth py-1 px-1">
-        {/* Current user Add Story Button */}
-        <div 
-          onClick={() => setIsCreateOpen(true)}
-          className="flex flex-col items-center gap-1.5 cursor-pointer flex-shrink-0 group"
-        >
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full p-[2px] bg-zinc-200 dark:bg-zinc-800 transition-transform group-hover:scale-105">
-              <img
-                src={currentUser.avatar}
-                alt="My Story"
-                className="w-full h-full rounded-full object-cover"
-              />
+    <div className="w-full glass-panel rounded-3xl p-3 sm:p-3.5 mb-6 shadow-sm border border-white/20 dark:border-white/10">
+      <div className="flex items-center gap-3.5 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-1 px-1">
+        {/* Single clean "Add to Story" / "Your Story" bubble */}
+        <div className="flex flex-col items-center gap-1.5 flex-shrink-0 group select-none">
+          <div 
+            onClick={() => {
+              if (userStoryGroup && userStoryGroup.stories.length > 0) {
+                openStory(userStoryGroup);
+              } else {
+                setIsCreateOpen(true);
+              }
+            }}
+            className="relative cursor-pointer"
+          >
+            <div 
+              className={`w-16 h-16 rounded-full p-[2.5px] transition-all duration-300 group-hover:scale-105 active:scale-95 ${
+                userStoryGroup && userStoryGroup.stories.length > 0 
+                  ? 'sw-story-border shadow-md' 
+                  : 'bg-zinc-200 dark:bg-zinc-800'
+              }`}
+            >
+              <div className="w-full h-full rounded-full p-[2px] bg-white dark:bg-zinc-950 overflow-hidden">
+                <LazyImage
+                  src={currentUser.avatar}
+                  alt="My Profile"
+                  fallbackText={currentUser.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
             </div>
-            <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full sw-gradient-bg text-white flex items-center justify-center ring-2 ring-white dark:ring-zinc-900 shadow">
+
+            {/* Quick add (+) badge */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsCreateOpen(true);
+              }}
+              title="Add new story"
+              aria-label="Add new story"
+              className="absolute bottom-0 right-0 w-5 h-5 rounded-full sw-gradient-bg text-white flex items-center justify-center ring-2 ring-white dark:ring-zinc-900 shadow hover:scale-110 active:scale-95 transition-transform"
+            >
               <Plus className="w-3.5 h-3.5 stroke-[3]" />
-            </div>
+            </button>
           </div>
-          <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[68px]">
-            Your story
+
+          <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-[68px]">
+            {userStoryGroup && userStoryGroup.stories.length > 0 ? 'Your Story' : 'Add Story'}
           </span>
         </div>
 
-        {/* Stories list */}
-        {stories.map((group) => {
-          // If this is user's own story group and already listed, show or render
-          if (group.userId === currentUser.id && group.stories.length === 0) return null;
-
+        {/* Stories from Clubs & Peers (No duplicate of current user) */}
+        {otherStories.map((group) => {
           const isClub = group.isClub;
           const borderClass = isClub ? 'sw-club-border' : 'sw-story-border';
 
@@ -43,20 +70,21 @@ export const StoriesBar: React.FC = () => {
             <div
               key={group.id}
               onClick={() => openStory(group)}
-              className="flex flex-col items-center gap-1.5 cursor-pointer flex-shrink-0 group"
+              className="flex flex-col items-center gap-1.5 cursor-pointer flex-shrink-0 group select-none"
             >
               <div
-                className={`w-16 h-16 rounded-full p-[2.5px] ${borderClass} transition-transform group-hover:scale-105 active:scale-95 duration-200 shadow-sm`}
+                className={`w-16 h-16 rounded-full p-[2.5px] ${borderClass} transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-sm`}
               >
-                <div className="w-full h-full rounded-full p-[2px] bg-white dark:bg-zinc-950">
-                  <img
+                <div className="w-full h-full rounded-full p-[2px] bg-white dark:bg-zinc-950 overflow-hidden">
+                  <LazyImage
                     src={group.userAvatar}
                     alt={group.userName}
+                    fallbackText={group.userName}
                     className="w-full h-full rounded-full object-cover"
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-0.5 max-w-[68px]">
+              <div className="flex items-center gap-0.5 max-w-[70px]">
                 <span className="text-[11px] font-medium text-zinc-800 dark:text-zinc-200 truncate">
                   {group.userName}
                 </span>

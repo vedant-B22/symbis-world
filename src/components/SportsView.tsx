@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { 
   Trophy, 
-  Flame, 
-  Calendar, 
   MapPin, 
   Medal, 
-  Users, 
-  Activity,
-  Plus
+  Calendar as CalendarIcon, 
+  Radio,
+  ArrowUpRight,
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { formatHumanDate } from '../utils/formatters';
 
 export const SportsView: React.FC = () => {
   const { fixtures, standings } = useApp();
@@ -23,7 +24,7 @@ export const SportsView: React.FC = () => {
 
   return (
     <div className="w-full pb-16">
-      {/* Sports Header Banner */}
+      {/* Sports Header Hero Banner with glassmorphism */}
       <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-900 text-white shadow-xl mb-6 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
@@ -34,7 +35,7 @@ export const SportsView: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
             Fixtures, Live Scores & Standings
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-100 max-w-lg">
+          <p className="text-xs sm:text-sm text-emerald-100 max-w-lg leading-relaxed">
             Track inter-school tournaments, cheer on your department, and sign up for upcoming trials.
           </p>
         </div>
@@ -46,10 +47,10 @@ export const SportsView: React.FC = () => {
           <button
             key={sport}
             onClick={() => setFilterSport(sport)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               filterSport === sport
                 ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800'
+                : 'glass-panel text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             }`}
           >
             {sport}
@@ -61,8 +62,8 @@ export const SportsView: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-black text-zinc-900 dark:text-white flex items-center gap-2">
-            <span>Match Schedule & Results</span>
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+            <span>Match Schedule & Scores</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
           </h2>
         </div>
 
@@ -74,82 +75,97 @@ export const SportsView: React.FC = () => {
             return (
               <div
                 key={fixture.id}
-                className="bg-white dark:bg-zinc-900/70 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+                className="glass-panel spotlight-card rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-sm relative overflow-hidden flex flex-col justify-between"
               >
                 {/* Header status */}
                 <div className="flex items-center justify-between mb-3 text-xs">
-                  <span className="font-bold text-zinc-500 dark:text-zinc-400">
+                  <span className="font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-[11px]">
                     {fixture.sport} • {fixture.tournamentName}
                   </span>
                   {isLive ? (
-                    <span className="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-black text-[10px] uppercase flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                      Live Now
+                    <span className="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-black text-[10px] uppercase flex items-center gap-1.5 animate-pulse">
+                      <Radio className="w-3 h-3" />
+                      Live Match
                     </span>
                   ) : isCompleted ? (
-                    <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-[10px] font-bold">
-                      Completed
+                    <span className="px-2.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-[10px] font-bold">
+                      Full Time
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 text-[10px] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 text-[10px] font-bold">
                       Upcoming
                     </span>
                   )}
                 </div>
 
-                {/* Teams Scoreboard */}
-                <div className="grid grid-cols-5 items-center py-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl px-4 mb-3">
-                  {/* Team A */}
-                  <div className="col-span-2 text-center">
-                    <div className="text-2xl mb-1">{fixture.teamA.logo}</div>
-                    <div className="font-bold text-xs text-zinc-900 dark:text-white truncate">
-                      {fixture.teamA.name}
-                    </div>
-                    <div className="text-[10px] text-zinc-400 truncate">{fixture.teamA.school}</div>
-                  </div>
-
-                  {/* Score or VS */}
-                  <div className="col-span-1 text-center font-mono font-black text-sm text-zinc-900 dark:text-zinc-100">
-                    {fixture.teamA.score && fixture.teamB.score ? (
-                      <div className="bg-zinc-200 dark:bg-zinc-700/60 py-1 px-2 rounded-lg text-xs">
-                        {fixture.teamA.score} - {fixture.teamB.score}
+                {/* Refined Teams Scoreboard with No wrapping & Tabular Numerals */}
+                <div className="py-4 px-4 bg-zinc-100/70 dark:bg-zinc-900/70 rounded-2xl mb-3 border border-zinc-200/50 dark:border-zinc-800/50">
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Team A */}
+                    <div className="flex-1 flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center shadow flex-shrink-0">
+                        {fixture.teamA.logo}
                       </div>
-                    ) : (
-                      <span className="text-zinc-400 text-xs">VS</span>
-                    )}
-                  </div>
-
-                  {/* Team B */}
-                  <div className="col-span-2 text-center">
-                    <div className="text-2xl mb-1">{fixture.teamB.logo}</div>
-                    <div className="font-bold text-xs text-zinc-900 dark:text-white truncate">
-                      {fixture.teamB.name}
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-zinc-900 dark:text-white truncate">
+                          {fixture.teamA.name}
+                        </div>
+                        <div className="text-[10px] text-zinc-400 truncate">{fixture.teamA.school}</div>
+                      </div>
                     </div>
-                    <div className="text-[10px] text-zinc-400 truncate">{fixture.teamB.school}</div>
+
+                    {/* Central Score Block */}
+                    <div className="flex-shrink-0 px-3 text-center">
+                      {fixture.teamA.score && fixture.teamB.score ? (
+                        <div className="flex items-center gap-1.5 font-tabular font-black text-sm sm:text-base text-zinc-900 dark:text-zinc-100 whitespace-nowrap bg-white/70 dark:bg-zinc-800/80 px-2.5 py-1 rounded-xl shadow-xs border border-zinc-200/60 dark:border-zinc-700/60">
+                          <span>{fixture.teamA.score}</span>
+                          <span className="text-zinc-400 text-xs px-0.5">-</span>
+                          <span>{fixture.teamB.score}</span>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] font-black uppercase text-zinc-400 bg-zinc-200/60 dark:bg-zinc-800/60 px-2.5 py-1 rounded-xl">
+                          VS
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Team B */}
+                    <div className="flex-1 flex items-center justify-end gap-2.5 min-w-0 text-right">
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-zinc-900 dark:text-white truncate">
+                          {fixture.teamB.name}
+                        </div>
+                        <div className="text-[10px] text-zinc-400 truncate">{fixture.teamB.school}</div>
+                      </div>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-600 to-rose-700 text-white font-black text-xs flex items-center justify-center shadow flex-shrink-0">
+                        {fixture.teamB.logo}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Match Updates / Venue */}
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>{fixture.venue}</span>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                    <span className="truncate">{fixture.venue}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>{fixture.date} • {fixture.time}</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <CalendarIcon className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>{formatHumanDate(fixture.date, fixture.time)}</span>
                   </div>
                 </div>
 
                 {fixture.liveUpdates && (
-                  <div className="mt-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40 text-[11px] text-rose-700 dark:text-rose-300 font-medium">
-                    ⚡️ {fixture.liveUpdates}
+                  <div className="mt-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40 text-[11px] text-rose-700 dark:text-rose-300 font-medium flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
+                    <span>{fixture.liveUpdates}</span>
                   </div>
                 )}
 
                 {fixture.winner && (
-                  <div className="mt-3 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    🏆 Winner: {fixture.winner}
+                  <div className="mt-2.5 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    🏆 Match Winner: {fixture.winner}
                   </div>
                 )}
               </div>
@@ -159,7 +175,7 @@ export const SportsView: React.FC = () => {
       </div>
 
       {/* Inter-School Leaderboard Table */}
-      <div className="bg-white dark:bg-zinc-900/70 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 shadow-sm">
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-white/20 dark:border-white/10 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Medal className="w-5 h-5 text-amber-500" />
@@ -167,7 +183,7 @@ export const SportsView: React.FC = () => {
               Annual Inter-School Sports Championship Table
             </h3>
           </div>
-          <span className="text-xs text-zinc-400 font-semibold">2026 Season</span>
+          <span className="text-xs text-zinc-400 font-semibold font-tabular">2026 Season</span>
         </div>
 
         <div className="overflow-x-auto">
@@ -186,19 +202,19 @@ export const SportsView: React.FC = () => {
               {standings.map((row, idx) => (
                 <tr 
                   key={row.school} 
-                  className={`hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors ${
+                  className={`hover:bg-zinc-50/70 dark:hover:bg-zinc-800/40 transition-colors ${
                     idx === 0 ? 'bg-amber-500/5 font-bold' : ''
                   }`}
                 >
                   <td className="py-3 px-3 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-                    <span className="w-5 font-bold text-zinc-400">{idx + 1}</span>
+                    <span className="w-5 font-bold text-zinc-400 font-tabular">{idx + 1}</span>
                     <span className="truncate">{row.school}</span>
                   </td>
-                  <td className="py-3 px-2 text-center text-zinc-600 dark:text-zinc-400">{row.played}</td>
-                  <td className="py-3 px-2 text-center text-emerald-600 font-bold">{row.won}</td>
-                  <td className="py-3 px-2 text-center text-rose-500">{row.lost}</td>
-                  <td className="py-3 px-2 text-center font-bold text-amber-500">{row.gold}</td>
-                  <td className="py-3 px-3 text-right font-black text-purple-600 dark:text-purple-400 text-sm">
+                  <td className="py-3 px-2 text-center text-zinc-600 dark:text-zinc-400 font-tabular">{row.played}</td>
+                  <td className="py-3 px-2 text-center text-emerald-600 font-bold font-tabular">{row.won}</td>
+                  <td className="py-3 px-2 text-center text-rose-500 font-tabular">{row.lost}</td>
+                  <td className="py-3 px-2 text-center font-bold text-amber-500 font-tabular">{row.gold}</td>
+                  <td className="py-3 px-3 text-right font-black text-purple-600 dark:text-purple-400 text-sm font-tabular">
                     {row.points} pts
                   </td>
                 </tr>

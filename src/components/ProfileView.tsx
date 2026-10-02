@@ -7,14 +7,18 @@ import {
   Grid, 
   Lock, 
   Settings, 
-  ExternalLink,
-  ShieldCheck,
-  CheckCircle2,
-  FileDown
+  ExternalLink, 
+  CheckCircle2, 
+  FileDown, 
+  Flame, 
+  Zap, 
+  TrendingUp 
 } from 'lucide-react';
 import { InstagramIcon as Instagram } from './InstagramIcon';
 import { useApp } from '../context/AppContext';
 import { PostCard } from './PostCard';
+import { LazyImage } from './LazyImage';
+import { formatHumanDate, pluralize } from '../utils/formatters';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -23,8 +27,7 @@ export const ProfileView: React.FC = () => {
     posts, 
     events, 
     clubs, 
-    setSelectedEventId, 
-    setSelectedClubId 
+    setSelectedEventId 
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'posts' | 'resume' | 'events' | 'saved' | 'settings'>('posts');
@@ -69,19 +72,22 @@ export const ProfileView: React.FC = () => {
   return (
     <div className="w-full pb-16">
       {/* Profile Header */}
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm mb-6">
+      <div className="glass-panel rounded-3xl p-6 border border-white/20 dark:border-white/10 shadow-sm mb-6 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar with Story Style Ring */}
           <div className="relative">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 sw-story-border shadow-lg">
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-full h-full rounded-full object-cover ring-2 ring-white dark:ring-zinc-900"
-              />
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 sw-story-border shadow-xl">
+              <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-white dark:ring-zinc-900">
+                <LazyImage
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  fallbackText={currentUser.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
             {currentUser.role === 'club_admin' && (
-              <span className="absolute bottom-1 right-1 bg-cyan-500 text-white p-1 rounded-full text-[10px] font-black">
+              <span className="absolute bottom-1 right-1 bg-cyan-500 text-white p-1 rounded-full text-[10px] font-black shadow">
                 Club
               </span>
             )}
@@ -91,7 +97,7 @@ export const ProfileView: React.FC = () => {
           <div className="flex-1 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white flex items-center justify-center sm:justify-start gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white flex items-center justify-center sm:justify-start gap-2 font-heading">
                   {currentUser.name}
                   <CheckCircle2 className="w-5 h-5 text-purple-500" />
                 </h1>
@@ -101,13 +107,13 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="py-2 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  className="py-2 px-4 rounded-xl bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 text-xs font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                 >
                   {isEditing ? 'Cancel' : 'Edit Profile'}
                 </button>
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  className="p-2 rounded-xl bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
                 >
                   <Settings className="w-4 h-4" />
                 </button>
@@ -119,10 +125,10 @@ export const ProfileView: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[11px] font-bold border border-purple-200/50 dark:border-purple-800/40">
                 {currentUser.program}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold">
                 {currentUser.year}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold">
                 {currentUser.school}
               </span>
             </div>
@@ -159,23 +165,23 @@ export const ProfileView: React.FC = () => {
               </p>
             )}
 
-            {/* Stats Row */}
-            <div className="flex items-center justify-center sm:justify-start gap-6 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs">
+            {/* Stats Row with Tabular Numerals */}
+            <div className="flex items-center justify-center sm:justify-start gap-6 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-tabular">
               <div>
                 <span className="font-black text-zinc-900 dark:text-white mr-1">{myPosts.length}</span>
-                <span className="text-zinc-400">posts</span>
+                <span className="text-zinc-400 font-sans">posts</span>
               </div>
               <div>
                 <span className="font-black text-zinc-900 dark:text-white mr-1">{currentUser.followersCount}</span>
-                <span className="text-zinc-400">followers</span>
+                <span className="text-zinc-400 font-sans">followers</span>
               </div>
               <div>
                 <span className="font-black text-zinc-900 dark:text-white mr-1">{currentUser.followingCount}</span>
-                <span className="text-zinc-400">following</span>
+                <span className="text-zinc-400 font-sans">following</span>
               </div>
               <div>
                 <span className="font-black text-purple-600 dark:text-purple-400 mr-1">{currentUser.eventsAttendedCount}</span>
-                <span className="text-zinc-400">events attended</span>
+                <span className="text-zinc-400 font-sans">events attended</span>
               </div>
             </div>
 
@@ -199,7 +205,7 @@ export const ProfileView: React.FC = () => {
       </div>
 
       {/* Profile Navigation Tabs */}
-      <div className="flex items-center justify-around bg-white dark:bg-zinc-900 rounded-2xl p-1 mb-6 border border-zinc-200/80 dark:border-zinc-800/80 text-xs font-bold">
+      <div className="flex items-center justify-around glass-panel rounded-2xl p-1 mb-6 border border-white/20 dark:border-white/10 text-xs font-bold">
         <button
           onClick={() => setActiveTab('posts')}
           className={`flex items-center gap-1.5 py-2.5 px-4 rounded-xl transition-all ${
@@ -254,14 +260,19 @@ export const ProfileView: React.FC = () => {
         <div>
           {myPosts.length === 0 ? (
             <div className="text-center py-12 text-zinc-400 text-xs">
-              No posts yet. Tap "+" below to share your first campus photo or reel!
+              No posts yet. Tap "+" to share your first campus photo or reel!
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:gap-3 rounded-2xl overflow-hidden">
               {myPosts.map(post => (
-                <div key={post.id} className="relative aspect-square bg-zinc-900 group rounded-xl overflow-hidden cursor-pointer">
-                  <img src={post.media[0]} alt="Post" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-3">
+                <div key={post.id} className="relative aspect-square bg-zinc-900 group rounded-2xl overflow-hidden cursor-pointer">
+                  <LazyImage 
+                    src={post.media[0]} 
+                    alt="Post" 
+                    fallbackText={currentUser.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-3 font-tabular">
                     <span>❤️ {post.likesCount}</span>
                     <span>💬 {post.commentsCount}</span>
                   </div>
@@ -274,7 +285,7 @@ export const ProfileView: React.FC = () => {
 
       {/* Tab 2: Campus Resume (Shareable Extracurricular Card) */}
       {activeTab === 'resume' && (
-        <div className="bg-gradient-to-br from-zinc-900 via-purple-950 to-zinc-900 p-6 sm:p-8 rounded-3xl border border-purple-500/30 text-white shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-zinc-950 via-purple-950 to-zinc-950 p-6 sm:p-8 rounded-3xl border border-purple-500/30 text-white shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Header */}
@@ -284,10 +295,10 @@ export const ProfileView: React.FC = () => {
                 SW
               </div>
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-pink-400">
+                <span className="text-[10px] font-black uppercase tracking-wider text-pink-400 font-heading">
                   SSPU Student Verified Pass
                 </span>
-                <h3 className="text-lg font-black text-white">Campus Extracurricular Resume</h3>
+                <h3 className="text-lg font-black text-white font-heading">Campus Extracurricular Resume</h3>
               </div>
             </div>
 
@@ -295,16 +306,36 @@ export const ProfileView: React.FC = () => {
               onClick={() => {
                 alert('Campus Resume card copied to clipboard for your LinkedIn & portfolio!');
               }}
-              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm"
+              className="py-2 px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm transition-colors"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Share Card</span>
             </button>
           </div>
 
+          {/* Activity Heatmap Grid Simulation (GitHub contribution style) */}
+          <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-zinc-300">Campus Activity Heatmap</span>
+              <span className="text-[10px] text-zinc-400">14 Verified Events Attended</span>
+            </div>
+            <div className="grid grid-cols-12 gap-1.5 py-1">
+              {Array.from({ length: 36 }).map((_, i) => {
+                const intensity = i % 5 === 0 ? 'bg-purple-500' : i % 3 === 0 ? 'bg-purple-700' : i % 7 === 0 ? 'bg-pink-500' : 'bg-white/10';
+                return (
+                  <div 
+                    key={i} 
+                    className={`aspect-square rounded-md ${intensity} transition-transform hover:scale-125`}
+                    title={`Day ${i + 1}: Campus Engagement`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
           {/* Badges Section */}
           <div className="mb-6">
-            <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">Verified Badges</h4>
+            <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-2 font-heading">Verified Badges</h4>
             <div className="flex flex-wrap gap-2">
               {currentUser.badges.map((b, i) => (
                 <div key={i} className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-200 text-xs font-bold flex items-center gap-1.5">
@@ -325,7 +356,7 @@ export const ProfileView: React.FC = () => {
 
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
               <div className="text-zinc-400 font-bold mb-1">Total Campus Events Attended</div>
-              <div className="text-2xl font-black text-pink-400">{currentUser.eventsAttendedCount} Events</div>
+              <div className="text-2xl font-black text-pink-400 font-tabular">{currentUser.eventsAttendedCount} Events</div>
               <div className="text-[11px] text-zinc-400 mt-1">Pulse 2026, HackSprint, Acoustic Night</div>
             </div>
           </div>
@@ -349,16 +380,23 @@ export const ProfileView: React.FC = () => {
               <div
                 key={ev.id}
                 onClick={() => setSelectedEventId(ev.id)}
-                className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                className="p-4 glass-panel rounded-2xl border border-white/20 dark:border-white/10 flex items-center justify-between cursor-pointer hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <img src={ev.posterUrl} alt={ev.title} className="w-12 h-12 rounded-xl object-cover" />
+                  <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                    <LazyImage 
+                      src={ev.posterUrl} 
+                      alt={ev.title} 
+                      fallbackText={ev.title}
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
                   <div>
-                    <h4 className="text-sm font-bold text-zinc-900 dark:text-white">{ev.title}</h4>
-                    <div className="text-xs text-zinc-400">{ev.date} • {ev.venue}</div>
+                    <h4 className="text-sm font-bold text-zinc-900 dark:text-white font-heading">{ev.title}</h4>
+                    <div className="text-xs text-zinc-400">{formatHumanDate(ev.date, ev.startTime)} • {ev.venue}</div>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 shadow-xs">
                   Ticket Active 🎟️
                 </span>
               </div>
@@ -382,14 +420,14 @@ export const ProfileView: React.FC = () => {
 
       {/* Tab 5: Privacy & DPDP Settings */}
       {activeTab === 'settings' && (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200/80 dark:border-zinc-800/80">
-          <h3 className="text-base font-black text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="glass-panel rounded-3xl p-6 border border-white/20 dark:border-white/10">
+          <h3 className="text-base font-black text-zinc-900 dark:text-white mb-4 flex items-center gap-2 font-heading">
             <Lock className="w-5 h-5 text-purple-500" />
             Privacy & India DPDP Act 2023 Controls
           </h3>
 
           <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-100/70 dark:bg-zinc-800/50">
               <div>
                 <div className="font-bold text-zinc-900 dark:text-white">Private Profile</div>
                 <div className="text-zinc-500 text-[11px]">Only approved campus students can see your full feed.</div>
@@ -398,11 +436,11 @@ export const ProfileView: React.FC = () => {
                 type="checkbox"
                 checked={currentUser.isPrivate || false}
                 onChange={(e) => updateProfile({ isPrivate: e.target.checked })}
-                className="w-5 h-5 accent-purple-600 rounded"
+                className="w-5 h-5 accent-purple-600 rounded cursor-pointer"
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-100/70 dark:bg-zinc-800/50">
               <div>
                 <div className="font-bold text-zinc-900 dark:text-white">Hide Events Attended</div>
                 <div className="text-zinc-500 text-[11px]">Prevent your registered events from appearing publicly.</div>
@@ -411,23 +449,23 @@ export const ProfileView: React.FC = () => {
                 type="checkbox"
                 checked={currentUser.hideEventsAttended || false}
                 onChange={(e) => updateProfile({ hideEventsAttended: e.target.checked })}
-                className="w-5 h-5 accent-purple-600 rounded"
+                className="w-5 h-5 accent-purple-600 rounded cursor-pointer"
               />
             </div>
 
             {/* DPDP Data Export */}
-            <div className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20">
-              <h4 className="font-bold text-purple-700 dark:text-purple-300 mb-1">
+            <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+              <h4 className="font-bold text-purple-700 dark:text-purple-300 mb-1 font-heading">
                 Data Portability & Account Rights (DPDP Act)
               </h4>
-              <p className="text-zinc-600 dark:text-zinc-400 mb-3 text-[11px]">
+              <p className="text-zinc-600 dark:text-zinc-400 mb-3 text-[11px] leading-relaxed">
                 Under India's Digital Personal Data Protection Act 2023, you retain full ownership of your campus profile data. You can download an offline archive or request complete account erasure at any time.
               </p>
 
               <div className="flex gap-2">
                 <button
                   onClick={handleDownloadData}
-                  className="py-2 px-3.5 rounded-xl bg-purple-600 text-white font-bold flex items-center gap-1.5 shadow"
+                  className="py-2.5 px-4 rounded-xl bg-purple-600 text-white font-bold flex items-center gap-1.5 shadow hover:bg-purple-700 transition-colors"
                 >
                   <FileDown className="w-4 h-4" />
                   Download My Data (.JSON)
@@ -439,7 +477,7 @@ export const ProfileView: React.FC = () => {
                       alert('Account deletion request registered with the Grievance Officer.');
                     }
                   }}
-                  className="py-2 px-3 rounded-xl border border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold"
+                  className="py-2.5 px-4 rounded-xl border border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                 >
                   Delete Account
                 </button>

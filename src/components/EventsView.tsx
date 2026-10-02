@@ -9,10 +9,14 @@ import {
   Download, 
   Sparkles,
   Search,
-  Filter
+  ChevronRight,
+  Clock,
+  Radio
 } from 'lucide-react';
 import { EventItem, EventCategory } from '../types';
 import { useApp } from '../context/AppContext';
+import { LazyImage } from './LazyImage';
+import { formatHumanDate, pluralize } from '../utils/formatters';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 
@@ -49,7 +53,8 @@ export const EventsView: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const featuredEvent = events.find(e => e.isFeatured) || events[0];
+  const featuredEvents = events.filter(e => e.isFeatured || e.isTrending);
+  const heroEvent = featuredEvents[0] || events[0];
 
   const handleRegister = (ev: EventItem) => {
     const result = registerForEvent(ev.id);
@@ -59,7 +64,7 @@ export const EventsView: React.FC = () => {
         spread: 70,
         origin: { y: 0.6 }
       });
-      // Show QR Ticket
+      // Show Apple-Wallet-styled QR Ticket
       setShowQrModal({
         ...ev,
         isRegistered: true,
@@ -68,7 +73,7 @@ export const EventsView: React.FC = () => {
     }
   };
 
-  // Generate .ics calendar download
+  // Generate RFC 5545 .ics calendar download
   const downloadCalendarFile = (ev: EventItem) => {
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -92,59 +97,51 @@ END:VCALENDAR`;
 
   return (
     <div className="w-full pb-16">
-      {/* Hero Banner Header */}
-      <div className="relative rounded-3xl overflow-hidden mb-6 p-6 md:p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-zinc-950 text-white shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-black uppercase tracking-wider mb-3 backdrop-blur-sm border border-pink-500/30">
-            <Sparkles className="w-3.5 h-3.5" />
-            Campus Events Hub
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-white">
-            What's Happening at SSPU
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-300 mb-6 leading-relaxed">
-            Fests, hackathons, open mics, dance battles, and guest sessions. Reserve your spot with your institutional student pass.
-          </p>
-
-          {/* Featured Event Quick Card */}
-          {featuredEvent && (
-            <div 
-              onClick={() => setSelectedEventId(featuredEvent.id)}
-              className="glass-panel p-3.5 rounded-2xl cursor-pointer hover:scale-[1.01] transition-transform flex items-center justify-between border border-white/10"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={featuredEvent.posterUrl}
-                  alt={featuredEvent.title}
-                  className="w-12 h-12 rounded-xl object-cover"
-                />
-                <div>
-                  <span className="text-[10px] font-bold text-pink-400 uppercase">Featured Headline</span>
-                  <h4 className="text-sm font-bold text-white truncate max-w-xs">{featuredEvent.title}</h4>
-                  <div className="text-[11px] text-zinc-300 flex items-center gap-2 mt-0.5">
-                    <span>{featuredEvent.date}</span>
-                    <span>•</span>
-                    <span>{featuredEvent.venue}</span>
-                  </div>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-purple-300 hidden sm:inline">Details →</span>
+      {/* Hero Cinematic Carousel Banner */}
+      {heroEvent && (
+        <div className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 bg-gradient-to-br from-purple-950 via-indigo-950 to-zinc-950 text-white shadow-2xl border border-white/20 dark:border-white/10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 left-10 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 max-w-xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-black uppercase tracking-wider mb-3 backdrop-blur-sm border border-pink-500/30">
+              <Sparkles className="w-3.5 h-3.5" />
+              SSPU Headline Event
             </div>
-          )}
+            
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-2 text-white font-heading">
+              {heroEvent.title}
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-300 mb-6 leading-relaxed line-clamp-2">
+              {heroEvent.subtitle} • {heroEvent.description}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setSelectedEventId(heroEvent.id)}
+                className="py-3 px-6 rounded-2xl sw-gradient-bg text-white font-bold text-xs shadow-lg shadow-purple-600/30 hover:scale-105 active:scale-95 transition-all"
+              >
+                Event Details & Pass
+              </button>
+              <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300 bg-white/10 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/15">
+                <Clock className="w-3.5 h-3.5 text-pink-400" />
+                <span>{formatHumanDate(heroEvent.date, heroEvent.startTime)}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-5">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-6">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events, clubs, or venues..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Search events, organizers, or campus venues..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass-panel text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
 
@@ -154,10 +151,10 @@ END:VCALENDAR`;
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 activeCategory === cat.id
                   ? 'sw-gradient-bg text-white shadow-md'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  : 'glass-panel text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
               {cat.label}
@@ -172,26 +169,27 @@ END:VCALENDAR`;
           return (
             <div
               key={ev.id}
-              className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col justify-between group"
+              className="glass-panel spotlight-card rounded-3xl border border-white/20 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group"
             >
               {/* Event Poster Header */}
               <div 
                 className="relative h-48 w-full overflow-hidden cursor-pointer"
                 onClick={() => setSelectedEventId(ev.id)}
               >
-                <img
+                <LazyImage
                   src={ev.posterUrl}
                   alt={ev.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fallbackText={ev.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider">
                     {ev.category}
                   </span>
                   {ev.isTrending && (
-                    <span className="px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-black">
+                    <span className="px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-black shadow">
                       Trending 🔥
                     </span>
                   )}
@@ -199,17 +197,20 @@ END:VCALENDAR`;
 
                 {/* Organizer Club Badge */}
                 <div 
-                  className="absolute bottom-3 left-3 flex items-center gap-2 cursor-pointer hover:opacity-90"
+                  className="absolute bottom-3 left-3 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedClubId(ev.clubId);
                   }}
                 >
-                  <img
-                    src={ev.clubLogo}
-                    alt={ev.clubName}
-                    className="w-7 h-7 rounded-full object-cover ring-2 ring-white/50"
-                  />
+                  <div className="w-7 h-7 rounded-full overflow-hidden ring-2 ring-white/60">
+                    <LazyImage
+                      src={ev.clubLogo}
+                      alt={ev.clubName}
+                      fallbackText={ev.clubName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <span className="text-white text-xs font-bold drop-shadow">
                     {ev.clubName}
                   </span>
@@ -221,7 +222,7 @@ END:VCALENDAR`;
                 <div>
                   <h3 
                     onClick={() => setSelectedEventId(ev.id)}
-                    className="text-base font-extrabold text-zinc-900 dark:text-zinc-100 hover:text-purple-600 dark:hover:text-purple-400 cursor-pointer transition-colors leading-snug mb-1"
+                    className="text-base font-extrabold text-zinc-900 dark:text-zinc-100 hover:text-purple-600 dark:hover:text-purple-400 cursor-pointer transition-colors leading-snug mb-1 font-heading"
                   >
                     {ev.title}
                   </h3>
@@ -229,18 +230,18 @@ END:VCALENDAR`;
                     {ev.subtitle}
                   </p>
 
-                  <div className="flex flex-col gap-1.5 text-xs text-zinc-600 dark:text-zinc-300 mb-4 bg-zinc-50 dark:bg-zinc-800/40 p-2.5 rounded-2xl">
+                  <div className="flex flex-col gap-1.5 text-xs text-zinc-600 dark:text-zinc-300 mb-4 bg-zinc-100/70 dark:bg-zinc-800/50 p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-700/50">
                     <div className="flex items-center gap-2">
-                      <CalendarIcon className="w-3.5 h-3.5 text-purple-500" />
-                      <span className="font-semibold">{ev.date} • {ev.startTime}</span>
+                      <CalendarIcon className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                      <span className="font-semibold">{formatHumanDate(ev.date, ev.startTime)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-pink-500" />
+                      <MapPin className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
                       <span className="truncate">{ev.venue}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                      <Users className="w-3.5 h-3.5 text-cyan-500" />
-                      <span>{ev.rsvpCount} students registered</span>
+                      <Users className="w-3.5 h-3.5 text-cyan-500 flex-shrink-0" />
+                      <span className="font-tabular">{pluralize(ev.rsvpCount, 'student')} registered</span>
                     </div>
                   </div>
                 </div>
@@ -251,7 +252,7 @@ END:VCALENDAR`;
                     <div className="flex items-center gap-2 w-full">
                       <button
                         onClick={() => setShowQrModal(ev)}
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-500/25 transition-all"
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-500/25 transition-all shadow-xs"
                       >
                         <QrCode className="w-4 h-4" />
                         <span>View Pass</span>
@@ -260,14 +261,14 @@ END:VCALENDAR`;
                       <button
                         onClick={() => downloadCalendarFile(ev)}
                         title="Add to Calendar (.ics)"
-                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <Download className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => cancelEventRegistration(ev.id)}
-                        className="py-2.5 px-3 text-[11px] text-zinc-400 hover:text-rose-500"
+                        className="py-2.5 px-3 text-[11px] text-zinc-400 hover:text-rose-500 transition-colors"
                       >
                         Cancel
                       </button>
@@ -278,13 +279,13 @@ END:VCALENDAR`;
                         onClick={() => handleRegister(ev)}
                         className="flex-1 py-2.5 px-4 rounded-xl sw-gradient-bg text-white font-bold text-xs shadow-md shadow-purple-600/20 hover:opacity-95 active:scale-98 transition-all flex items-center justify-center gap-1.5"
                       >
-                        <span>Register (Free)</span>
+                        <span>Register (Free Pass)</span>
                       </button>
 
                       <button
                         onClick={() => downloadCalendarFile(ev)}
                         title="Add to Calendar"
-                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <CalendarIcon className="w-4 h-4" />
                       </button>
@@ -295,10 +296,10 @@ END:VCALENDAR`;
                             navigator.share({ title: ev.title, text: ev.description, url: window.location.href });
                           } else {
                             navigator.clipboard.writeText(window.location.href);
-                            alert('Link copied!');
+                            alert('Event link copied!');
                           }
                         }}
-                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
@@ -311,52 +312,66 @@ END:VCALENDAR`;
         })}
       </div>
 
-      {/* QR Ticket Modal */}
+      {/* Apple Wallet-Style Holographic Event Pass Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-sm w-full p-6 text-center border border-zinc-200 dark:border-zinc-800 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative holo-ticket border border-white/30 text-white">
             <button
               onClick={() => setShowQrModal(null)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 dark:hover:text-white text-lg font-bold"
+              className="absolute top-4 right-4 text-white/70 hover:text-white text-lg font-bold"
             >
               ✕
             </button>
 
-            <div className="w-12 h-12 rounded-2xl sw-gradient-bg mx-auto flex items-center justify-center text-white font-black text-xl mb-3 shadow-lg">
-              SW
+            {/* Apple Wallet style header */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/20">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl sw-gradient-bg flex items-center justify-center text-white font-black text-xs shadow">
+                  SW
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider text-pink-300">
+                  Campus Pass
+                </span>
+              </div>
+              <span className="text-[10px] font-mono bg-white/20 px-2 py-0.5 rounded-md font-bold">
+                SSPU VERIFIED
+              </span>
             </div>
 
-            <div className="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
-              Official Campus Event Pass
-            </div>
-            <h3 className="text-base font-extrabold text-zinc-900 dark:text-white leading-tight mb-1">
+            <h3 className="text-base font-extrabold leading-tight mb-1 text-white font-heading">
               {showQrModal.title}
             </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
-              {showQrModal.date} • {showQrModal.startTime} • {showQrModal.venue}
+            <p className="text-xs text-white/80 mb-4 font-semibold">
+              {formatHumanDate(showQrModal.date, showQrModal.startTime)} • {showQrModal.venue}
             </p>
 
+            {/* Perforated Divider Simulation */}
+            <div className="relative my-4 border-t-2 border-dashed border-white/30 flex items-center justify-between -mx-6">
+              <div className="w-6 h-6 rounded-full bg-black/90 -ml-3" />
+              <div className="w-6 h-6 rounded-full bg-black/90 -mr-3" />
+            </div>
+
             {/* QR Code SVG Generation */}
-            <div className="bg-white p-4 rounded-2xl inline-block shadow-inner border border-zinc-200 mb-4">
+            <div className="bg-white p-4 rounded-2xl inline-block shadow-2xl border border-white/40 my-2">
               <QRCodeSVG
-                value={`SSPU-TICKET-${showQrModal.registrationTicketId || showQrModal.id}`}
-                size={180}
+                value={`SSPU-PASS-${showQrModal.registrationTicketId || showQrModal.id}`}
+                size={170}
                 level="H"
                 includeMargin={false}
               />
             </div>
 
-            <div className="font-mono text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 py-1.5 px-3 rounded-lg mb-3">
-              PASS ID: {showQrModal.registrationTicketId || 'SSPU-PASS-9081'}
+            <div className="font-mono text-xs font-bold text-white bg-black/40 py-2 px-3 rounded-xl mb-3 border border-white/10 mt-3 font-tabular">
+              TICKET ID: {showQrModal.registrationTicketId || 'SSPU-PASS-9081'}
             </div>
 
-            <p className="text-[10px] text-zinc-400 leading-tight mb-4">
-              Present this digital pass at the entrance gate. Valid for SSPU verified students only.
+            <p className="text-[10px] text-white/70 leading-tight mb-4">
+              Hold near turnstile or gate scanner. Valid for SSPU students.
             </p>
 
             <button
               onClick={() => setShowQrModal(null)}
-              className="w-full py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs hover:opacity-90 transition-opacity"
+              className="w-full py-2.5 rounded-xl bg-white text-zinc-900 font-extrabold text-xs hover:bg-white/90 transition-opacity shadow"
             >
               Done
             </button>
@@ -390,23 +405,28 @@ const EventDetailModal: React.FC<{
   if (!ev) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-800 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="glass-dropdown rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-white/20 dark:border-white/10 shadow-2xl relative text-zinc-900 dark:text-zinc-100">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/80"
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/80 transition-colors"
         >
           ✕
         </button>
 
         <div className="relative h-64 w-full">
-          <img src={ev.posterUrl} alt={ev.title} className="w-full h-full object-cover" />
+          <LazyImage 
+            src={ev.posterUrl} 
+            alt={ev.title} 
+            fallbackText={ev.title}
+            className="w-full h-full object-cover" 
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <span className="px-2.5 py-1 rounded-full bg-purple-600 text-[10px] font-black uppercase tracking-wider">
               {ev.category}
             </span>
-            <h2 className="text-xl font-extrabold mt-1 text-white">{ev.title}</h2>
+            <h2 className="text-xl font-extrabold mt-1 text-white font-heading">{ev.title}</h2>
           </div>
         </div>
 
@@ -416,19 +436,26 @@ const EventDetailModal: React.FC<{
               onClose();
               setSelectedClubId(ev.clubId);
             }}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 mb-5 cursor-pointer hover:bg-zinc-100"
+            className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-100/70 dark:bg-zinc-800/50 mb-5 cursor-pointer hover:bg-zinc-200/70 transition-colors"
           >
-            <img src={ev.clubLogo} alt={ev.clubName} className="w-10 h-10 rounded-full object-cover" />
+            <div className="w-10 h-10 rounded-full overflow-hidden">
+              <LazyImage 
+                src={ev.clubLogo} 
+                alt={ev.clubName} 
+                fallbackText={ev.clubName}
+                className="w-full h-full object-cover" 
+              />
+            </div>
             <div>
               <div className="text-xs text-zinc-400">Organized by</div>
-              <div className="text-sm font-bold text-zinc-900 dark:text-white">{ev.clubName}</div>
+              <div className="text-sm font-bold text-zinc-900 dark:text-white font-heading">{ev.clubName}</div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-5 text-xs">
             <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/40">
               <span className="text-zinc-500 dark:text-zinc-400 block text-[10px] uppercase font-bold">Date & Time</span>
-              <span className="font-bold text-purple-700 dark:text-purple-300">{ev.date} • {ev.startTime}</span>
+              <span className="font-bold text-purple-700 dark:text-purple-300">{formatHumanDate(ev.date, ev.startTime)}</span>
             </div>
             <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200/40">
               <span className="text-zinc-500 dark:text-zinc-400 block text-[10px] uppercase font-bold">Venue</span>
@@ -436,7 +463,7 @@ const EventDetailModal: React.FC<{
             </div>
           </div>
 
-          <h4 className="text-sm font-bold text-zinc-900 dark:text-white mb-1.5">About the Event</h4>
+          <h4 className="text-sm font-bold text-zinc-900 dark:text-white mb-1.5 font-heading">About the Event</h4>
           <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed mb-5">
             {ev.description}
           </p>
@@ -453,7 +480,7 @@ const EventDetailModal: React.FC<{
           )}
 
           {ev.rules && (
-            <div className="mb-6 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 text-[11px] text-zinc-500 dark:text-zinc-400">
+            <div className="mb-6 p-3 rounded-2xl bg-zinc-100/60 dark:bg-zinc-800/40 text-[11px] text-zinc-500 dark:text-zinc-400">
               <span className="font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Campus Guidelines</span>
               {ev.rules.map((r, i) => (
                 <div key={i}>• {r}</div>
@@ -465,7 +492,7 @@ const EventDetailModal: React.FC<{
             {ev.isRegistered ? (
               <button
                 onClick={() => onShowQr(ev)}
-                className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow"
               >
                 <QrCode className="w-4 h-4" />
                 View Registered Pass
@@ -473,14 +500,14 @@ const EventDetailModal: React.FC<{
             ) : (
               <button
                 onClick={() => onRegister(ev)}
-                className="flex-1 py-3 rounded-xl sw-gradient-bg text-white font-bold text-xs"
+                className="flex-1 py-3 rounded-xl sw-gradient-bg text-white font-bold text-xs shadow-md"
               >
                 Confirm Free Registration
               </button>
             )}
             <button
               onClick={() => onDownloadCalendar(ev)}
-              className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300"
+              className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <CalendarIcon className="w-4 h-4" />
             </button>

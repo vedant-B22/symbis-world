@@ -111,8 +111,8 @@ export const INITIAL_CLUBS: Club[] = [
     name: 'SSPU Knights Athletics & Sports Club',
     handle: '@sspu_knights',
     category: 'Sports & Fitness',
-    logoUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=150&auto=format&fit=crop&q=80',
-    bannerUrl: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=1200&auto=format&fit=crop&q=80',
+    logoUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200&auto=format&fit=crop&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
     description: 'Home of campus leagues in Football, Cricket, Badminton, Volleyball, and Athletics. Champions of West Zone Inter-Uni 2025!',
     membersCount: 520,
     isFollowed: true,
@@ -641,7 +641,7 @@ export const INITIAL_POSTS: Post[] = [
     isClubAuthor: true,
     clubId: 'club-shutters',
     media: [
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=1000&auto=format&fit=crop&q=80'
     ],
     mediaType: 'image',
     caption: 'Sunset skies over the SSPU architecture dome tonight. Shot on Sony A7IV by our media lead @kabir_v. Check out the full reel on our Instagram! 🌄✨',
@@ -732,34 +732,34 @@ export const INITIAL_FIXTURES: SportsFixture[] = [
     id: 'fix-1',
     sport: 'Football',
     tournamentName: 'SSPU Inter-School Cup 2026',
-    teamA: { name: 'CS & IT Knights', score: '3', logo: '💻', school: 'School of CS & IT' },
-    teamB: { name: 'Arch & Design Titans', score: '1', logo: '📐', school: 'School of Architecture' },
+    teamA: { name: 'CS Knights', score: '3', logo: 'CSK', school: 'School of CS & IT' },
+    teamB: { name: 'Arch Titans', score: '1', logo: 'ADT', school: 'School of Architecture' },
     status: 'completed',
-    date: 'Oct 01, 2026',
+    date: '2026-10-01',
     time: '4:30 PM',
     venue: 'Main Football Turf',
-    winner: 'CS & IT Knights'
+    winner: 'CS Knights'
   },
   {
     id: 'fix-2',
     sport: 'Cricket',
     tournamentName: 'SSPU Premier League (T10)',
-    teamA: { name: 'Management Mavericks', score: '84/3 (8.2)', logo: '📈', school: 'School of Management' },
-    teamB: { name: 'Automobile Strikers', score: '98/6 (10.0)', logo: '🏎️', school: 'School of Automobile' },
+    teamA: { name: 'Mgmt Mavericks', score: '84/3 (8.2 ov)', logo: 'MM', school: 'School of Management' },
+    teamB: { name: 'Auto Strikers', score: '98/6 (10.0 ov)', logo: 'AS', school: 'School of Automobile' },
     status: 'live',
     date: 'Today',
     time: '5:00 PM',
     venue: 'Cricket Oval',
-    liveUpdates: 'Management needs 15 runs from 10 balls. Exciting finish brewing!'
+    liveUpdates: 'Management needs 15 runs from 10 balls • Req RR: 9.00'
   },
   {
     id: 'fix-3',
     sport: 'Basketball',
     tournamentName: 'Autumn Hoops Championship',
-    teamA: { name: 'Beauty & Wellness Stars', logo: '💄', school: 'School of Beauty & Wellness' },
-    teamB: { name: 'CS Cyber Ballers', logo: '⚡️', school: 'School of CS & IT' },
+    teamA: { name: 'Beauty Stars', logo: 'BWS', school: 'School of Beauty & Wellness' },
+    teamB: { name: 'Cyber Ballers', logo: 'CCB', school: 'School of CS & IT' },
     status: 'upcoming',
-    date: 'Tomorrow, Oct 03',
+    date: 'Tomorrow',
     time: '6:00 PM',
     venue: 'Indoor Sports Complex Court 1'
   },
@@ -767,10 +767,10 @@ export const INITIAL_FIXTURES: SportsFixture[] = [
     id: 'fix-4',
     sport: 'Badminton',
     tournamentName: 'Inter-Collegiate Doubles',
-    teamA: { name: 'Architecture Smashers', logo: '🏸', school: 'School of Architecture' },
-    teamB: { name: 'Retail Raiders', logo: '🛍️', school: 'School of Retail' },
+    teamA: { name: 'Arch Smashers', logo: 'ASM', school: 'School of Architecture' },
+    teamB: { name: 'Retail Raiders', logo: 'RR', school: 'School of Retail' },
     status: 'upcoming',
-    date: 'Oct 05, 2026',
+    date: '2026-10-05',
     time: '3:00 PM',
     venue: 'Wooden Badminton Hall'
   }

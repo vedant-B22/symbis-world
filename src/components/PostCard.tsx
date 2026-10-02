@@ -11,12 +11,18 @@ import {
   Send,
   ShieldAlert,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Smile,
+  Flame
 } from 'lucide-react';
 import { InstagramIcon as Instagram } from './InstagramIcon';
 import { Post } from '../types';
 import { useApp } from '../context/AppContext';
+import { LazyImage } from './LazyImage';
+import { formatHumanDate, pluralize } from '../utils/formatters';
 import confetti from 'canvas-confetti';
+
+const QUICK_REACTIONS = ['❤️', '🔥', '👏', '😂', '🙌'];
 
 export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const { 
@@ -36,6 +42,10 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [showComments, setShowComments] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
+  const [reactions, setReactions] = useState<{ [emoji: string]: number }>({
+    '🔥': 14,
+    '👏': 8
+  });
 
   // Double tap to like
   const handleDoubleTap = () => {
@@ -44,8 +54,8 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     }
     setShowHeartBurst(true);
     confetti({
-      particleCount: 25,
-      spread: 45,
+      particleCount: 30,
+      spread: 50,
       origin: { y: 0.6 }
     });
     setTimeout(() => setShowHeartBurst(false), 900);
@@ -59,19 +69,34 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     setShowComments(true);
   };
 
+  const handleAddReaction = (emoji: string) => {
+    setReactions(prev => ({
+      ...prev,
+      [emoji]: (prev[emoji] || 0) + 1
+    }));
+    confetti({
+      particleCount: 15,
+      spread: 40,
+      origin: { y: 0.7 }
+    });
+  };
+
   const isAuthor = currentUser.id === post.authorId || currentUser.role === 'super_admin';
 
   return (
-    <article className="w-full bg-white dark:bg-zinc-900/60 rounded-3xl mb-6 border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <article className="w-full glass-panel spotlight-card rounded-3xl mb-6 border border-white/20 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
       {/* Post Header */}
       <div className="flex items-center justify-between p-3.5 sm:px-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img
-              src={post.authorAvatar}
-              alt={post.authorName}
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/30"
-            />
+            <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-purple-500/30">
+              <LazyImage
+                src={post.authorAvatar}
+                alt={post.authorName}
+                fallbackText={post.authorName}
+                className="w-full h-full object-cover"
+              />
+            </div>
             {post.isClubAuthor && (
               <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-white flex items-center justify-center text-[9px] font-black shadow">
                 C
@@ -79,7 +104,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             )}
           </div>
           <div className="leading-tight">
-            <div className="flex items-center gap-1.5 font-bold text-sm text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center gap-1.5 font-bold text-sm text-zinc-900 dark:text-zinc-100 font-heading">
               <span 
                 className="hover:underline cursor-pointer"
                 onClick={() => post.clubId && setSelectedClubId(post.clubId)}
@@ -93,13 +118,13 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
               <span>@{post.authorUsername}</span>
               <span>•</span>
-              <span>{post.createdAt}</span>
+              <span>{formatHumanDate(post.createdAt)}</span>
               {post.location && (
                 <>
                   <span>•</span>
-                  <span className="flex items-center gap-0.5 text-zinc-600 dark:text-zinc-300">
-                    <MapPin className="w-2.5 h-2.5" />
-                    {post.location}
+                  <span className="flex items-center gap-0.5 text-zinc-600 dark:text-zinc-300 truncate max-w-[120px]">
+                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                    <span className="truncate">{post.location}</span>
                   </span>
                 </>
               )}
@@ -111,7 +136,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+            className="p-1.5 rounded-full hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 text-zinc-500 transition-colors"
           >
             <MoreHorizontal className="w-5 h-5" />
           </button>
@@ -168,7 +193,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       {/* Instagram Banner if Linked */}
       {post.isInstagramLinked && (
         <div className="px-4 py-2 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-rose-500/10 border-y border-pink-500/20 flex items-center justify-between text-xs font-medium">
-          <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400">
+          <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400 font-semibold">
             <Instagram className="w-4 h-4" />
             <span>Linked from Instagram</span>
             {post.instagramAuthorHandle && (
@@ -192,10 +217,11 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         className="relative w-full aspect-square bg-zinc-950 flex items-center justify-center overflow-hidden cursor-pointer select-none"
         onDoubleClick={handleDoubleTap}
       >
-        <img
+        <LazyImage
           src={post.media[activeSlide]}
-          alt="Post content"
-          className="w-full h-full object-cover transition-transform duration-300"
+          alt={post.caption || 'Campus photo'}
+          fallbackText={post.authorName}
+          className="w-full h-full object-cover transition-transform duration-500"
         />
 
         {/* Double-tap animated heart burst */}
@@ -246,10 +272,10 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         )}
       </div>
 
-      {/* Post Actions (Like, Comment, Save, Share) */}
+      {/* Post Actions (Like, Comment, Save, Share, Reactions) */}
       <div className="p-3.5 sm:px-4">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => toggleLikePost(post.id)}
               className="group active:scale-90 transition-transform"
@@ -285,28 +311,55 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             </button>
           </div>
 
-          <button
-            onClick={() => toggleSavePost(post.id)}
-            className="active:scale-90 transition-transform"
-          >
-            <Bookmark
-              className={`w-6 h-6 transition-colors ${
-                post.isSaved
-                  ? 'fill-purple-600 text-purple-600'
-                  : 'text-zinc-700 dark:text-zinc-300 hover:text-purple-600'
-              }`}
-            />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Quick emoji reactions */}
+            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-100/70 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50 text-xs">
+              {QUICK_REACTIONS.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleAddReaction(emoji)}
+                  className="hover:scale-125 active:scale-95 transition-transform"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => toggleSavePost(post.id)}
+              className="active:scale-90 transition-transform text-zinc-700 dark:text-zinc-300 hover:text-purple-600"
+            >
+              <Bookmark
+                className={`w-6 h-6 transition-colors ${
+                  post.isSaved
+                    ? 'fill-purple-600 text-purple-600'
+                    : ''
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
-        {/* Likes Count */}
-        <div className="font-bold text-xs text-zinc-900 dark:text-zinc-100 mb-1.5">
-          {post.likesCount.toLocaleString()} {post.likesCount === 1 ? 'like' : 'likes'}
+        {/* Reaction counters if any */}
+        {Object.keys(reactions).length > 0 && (
+          <div className="flex items-center gap-1.5 mb-1.5">
+            {Object.entries(reactions).map(([emoji, count]) => (
+              <span key={emoji} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/80 text-[10px] font-bold text-zinc-600 dark:text-zinc-300 font-tabular">
+                <span>{emoji}</span>
+                <span>{count}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Likes Count with proper pluralization */}
+        <div className="font-bold text-xs text-zinc-900 dark:text-zinc-100 mb-1.5 font-tabular">
+          {pluralize(post.likesCount, 'like')}
         </div>
 
         {/* Caption */}
         <div className="text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed mb-2">
-          <span className="font-bold mr-1.5 text-zinc-900 dark:text-white">
+          <span className="font-bold mr-1.5 text-zinc-900 dark:text-white font-heading">
             {post.authorUsername}
           </span>
           {post.caption}
@@ -351,17 +404,20 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
         {/* Comments Section */}
         {showComments && (
-          <div className="flex flex-col gap-2.5 mb-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex flex-col gap-2.5 mb-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/60">
             {post.comments.map((comment) => (
               <div key={comment.id} className="flex items-start justify-between text-xs">
                 <div className="flex items-start gap-2 max-w-[85%]">
-                  <img
-                    src={comment.userAvatar}
-                    alt={comment.userName}
-                    className="w-5 h-5 rounded-full object-cover mt-0.5"
-                  />
+                  <div className="w-5 h-5 rounded-full overflow-hidden mt-0.5 flex-shrink-0">
+                    <LazyImage
+                      src={comment.userAvatar}
+                      alt={comment.userName}
+                      fallbackText={comment.userName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100 mr-1.5">
+                    <span className="font-bold text-zinc-900 dark:text-zinc-100 mr-1.5 font-heading">
                       {comment.userUsername}
                     </span>
                     <span className="text-zinc-700 dark:text-zinc-300">{comment.text}</span>

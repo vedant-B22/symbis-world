@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from './context/AppContext';
 import { NavigationBar } from './components/NavigationBar';
+import { RightRail } from './components/RightRail';
 import { StoriesBar } from './components/StoriesBar';
 import { PostCard } from './components/PostCard';
 import { EventsView } from './components/EventsView';
@@ -14,74 +15,120 @@ import { ClubAdminView } from './components/ClubAdminView';
 import { StoryModalViewer } from './components/StoryModalViewer';
 import { CreateModal } from './components/CreateModal';
 import { OnboardingModal } from './components/OnboardingModal';
-import { Sparkles, HelpCircle, ShieldCheck } from 'lucide-react';
+import { CommandPalette } from './components/CommandPalette';
+import { DevRoleMenu } from './components/DevRoleMenu';
+import { SWWrappedModal } from './components/SWWrappedModal';
+import { Sparkles, Trophy, Award, Radio } from 'lucide-react';
 
 export const MainApp: React.FC = () => {
-  const { activeTab, posts, isDark } = useApp();
+  const { activeTab, posts } = useApp();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showWrapped, setShowWrapped] = useState(false);
 
   return (
-    <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col md:pl-64 lg:pl-72 transition-colors duration-200`}>
-      {/* Navigation Layout: Desktop Sidebar & Mobile Bars */}
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col md:pl-64 lg:pl-72 transition-colors duration-300 relative selection:bg-purple-500 selection:text-white">
+      {/* Living Ambient Aurora Background */}
+      <div className="aurora-bg">
+        <div className="aurora-orb-1" />
+        <div className="aurora-orb-2" />
+        <div className="aurora-orb-3" />
+      </div>
+
+      {/* Film grain subtle overlay */}
+      <div className="noise-overlay" />
+
+      {/* Navigation Layout: Desktop Floating Dock & Mobile Glass Bars */}
       <NavigationBar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-16 md:pt-6 pb-20 md:pb-12">
-        {/* Feed Tab */}
-        {activeTab === 'feed' && (
-          <div className="max-w-xl mx-auto">
-            {/* Quick Demo Info Bar */}
-            <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-transparent border border-purple-500/20 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-pink-500 flex-shrink-0" />
-                <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                  Welcome to SSPU's student culture feed!
-                </span>
+      {/* Command Palette (Cmd/Ctrl + K) */}
+      <CommandPalette />
+
+      {/* Floating Dev Role Switcher Chip */}
+      <DevRoleMenu />
+
+      {/* Spotify-Wrapped Style Semester Recap Modal */}
+      <SWWrappedModal isOpen={showWrapped} onClose={() => setShowWrapped(false)} />
+
+      {/* Main Content Area: Responsive 3-Column on Desktop */}
+      <div className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-16 md:pt-6 pb-20 md:pb-12 flex gap-8 justify-center">
+        {/* Center Main Stage */}
+        <main className="flex-1 w-full max-w-3xl min-w-0">
+          {/* Feed Tab */}
+          {activeTab === 'feed' && (
+            <div className="w-full">
+              {/* Quick Announcement Bar & SW Wrapped banner */}
+              <div className="mb-5 p-3.5 rounded-3xl glass-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border border-white/20 dark:border-white/10 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl sw-gradient-bg text-white flex items-center justify-center font-black text-sm flex-shrink-0 shadow">
+                    ✨
+                  </div>
+                  <div>
+                    <span className="font-extrabold text-zinc-900 dark:text-white font-heading block">
+                      Welcome to Symbi's World
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      The premier social & culture hub for SSPU Pune.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowWrapped(true)}
+                    className="py-1.5 px-3 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-600 dark:text-pink-300 font-bold text-[11px] hover:bg-pink-500/25 transition-all shadow-xs flex items-center gap-1.5"
+                  >
+                    <span>SW Wrapped '26 🎁</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowOnboarding(true)}
+                    className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline px-1"
+                  >
+                    Replay Tour
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => setShowOnboarding(true)}
-                className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
-              >
-                Replay Onboarding
-              </button>
+
+              {/* Stories Bar */}
+              <StoriesBar />
+
+              {/* Feed Stream */}
+              <div className="space-y-6">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
             </div>
+          )}
 
-            {/* Stories Carousel */}
-            <StoriesBar />
+          {/* Events Hub Tab */}
+          {activeTab === 'events' && <EventsView />}
 
-            {/* Posts Stream */}
-            <div className="space-y-6">
-              {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-          </div>
-        )}
+          {/* Clubs Directory Tab */}
+          {activeTab === 'clubs' && <ClubsView />}
 
-        {/* Events Hub Tab */}
-        {activeTab === 'events' && <EventsView />}
+          {/* Sports Arena Tab */}
+          {activeTab === 'sports' && <SportsView />}
 
-        {/* Clubs Directory Tab */}
-        {activeTab === 'clubs' && <ClubsView />}
+          {/* Explore & Search Tab */}
+          {activeTab === 'explore' && <ExploreView />}
 
-        {/* Sports Arena Tab */}
-        {activeTab === 'sports' && <SportsView />}
+          {/* Activity & Notifications Tab */}
+          {activeTab === 'notifications' && <NotificationsView />}
 
-        {/* Explore & Search Tab */}
-        {activeTab === 'explore' && <ExploreView />}
+          {/* Profile Tab */}
+          {activeTab === 'profile' && <ProfileView />}
 
-        {/* Activity & Notifications Tab */}
-        {activeTab === 'notifications' && <NotificationsView />}
+          {/* Super Admin Moderation */}
+          {activeTab === 'admin' && <AdminModerationView />}
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && <ProfileView />}
+          {/* Club Admin Panel */}
+          {activeTab === 'club_admin' && <ClubAdminView />}
+        </main>
 
-        {/* Super Admin Moderation */}
-        {activeTab === 'admin' && <AdminModerationView />}
-
-        {/* Club Admin Panel */}
-        {activeTab === 'club_admin' && <ClubAdminView />}
-      </main>
+        {/* Right Rail on Desktop (Live strip, calendar, recruiting clubs) */}
+        {activeTab === 'feed' && <RightRail />}
+      </div>
 
       {/* Fullscreen Story Viewer Modal */}
       <StoryModalViewer />

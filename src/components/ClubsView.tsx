@@ -8,11 +8,15 @@ import {
   Mail, 
   ArrowRight,
   ShieldCheck,
-  Send
+  Send,
+  Calendar,
+  Award
 } from 'lucide-react';
 import { InstagramIcon as Instagram } from './InstagramIcon';
 import { Club } from '../types';
 import { useApp } from '../context/AppContext';
+import { LazyImage } from './LazyImage';
+import { formatHumanDate, pluralize } from '../utils/formatters';
 import confetti from 'canvas-confetti';
 
 const CLUB_CATEGORIES = [
@@ -71,13 +75,19 @@ export const ClubsView: React.FC = () => {
     <div className="w-full pb-16">
       {/* Club Detail View if Selected */}
       {selectedClub ? (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-sm mb-8">
+        <div className="glass-panel rounded-3xl border border-white/20 dark:border-white/10 overflow-hidden shadow-2xl mb-8">
           {/* Banner */}
           <div className="relative h-48 sm:h-64 w-full">
-            <img src={selectedClub.bannerUrl} alt={selectedClub.name} className="w-full h-full object-cover" />
+            <LazyImage 
+              src={selectedClub.bannerUrl} 
+              alt={selectedClub.name} 
+              fallbackText={selectedClub.name}
+              className="w-full h-full object-cover" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30" />
             <button
               onClick={() => setSelectedClubId(null)}
-              className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-black/60 text-white text-xs font-semibold backdrop-blur-md hover:bg-black/80"
+              className="absolute top-4 left-4 px-3.5 py-1.5 rounded-full bg-black/60 text-white text-xs font-semibold backdrop-blur-md hover:bg-black/80 transition-colors shadow"
             >
               ← Back to Directory
             </button>
@@ -87,14 +97,17 @@ export const ClubsView: React.FC = () => {
           <div className="p-6 relative">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-6">
               <div className="flex items-end gap-4">
-                <img
-                  src={selectedClub.logoUrl}
-                  alt={selectedClub.name}
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-white dark:ring-zinc-900 shadow-xl"
-                />
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden ring-4 ring-white dark:ring-zinc-900 shadow-2xl">
+                  <LazyImage
+                    src={selectedClub.logoUrl}
+                    alt={selectedClub.name}
+                    fallbackText={selectedClub.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="mb-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">
+                    <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white font-heading">
                       {selectedClub.name}
                     </h2>
                     <CheckCircle2 className="w-5 h-5 text-cyan-500" />
@@ -106,9 +119,9 @@ export const ClubsView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleFollowClub(selectedClub.id)}
-                  className={`py-2 px-5 rounded-2xl text-xs font-bold transition-all ${
+                  className={`py-2.5 px-5 rounded-2xl text-xs font-bold transition-all shadow-xs ${
                     selectedClub.isFollowed
-                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
+                      ? 'bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300'
                       : 'sw-gradient-bg text-white shadow-md'
                   }`}
                 >
@@ -118,7 +131,7 @@ export const ClubsView: React.FC = () => {
                 {selectedClub.recruitmentOpen && (
                   <button
                     onClick={() => setShowApplyModal(selectedClub)}
-                    className="py-2 px-4 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold shadow-md shadow-pink-500/20"
+                    className="py-2.5 px-4 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold shadow-md shadow-pink-500/20 active:scale-95 transition-all"
                   >
                     Join Crew 🚀
                   </button>
@@ -131,8 +144,8 @@ export const ClubsView: React.FC = () => {
               <span className="px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-bold border border-purple-200/50 dark:border-purple-800/40">
                 {selectedClub.category}
               </span>
-              <span className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-semibold">
-                {selectedClub.membersCount} Members
+              <span className="px-3 py-1 rounded-full bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-xs font-semibold font-tabular">
+                {pluralize(selectedClub.membersCount, 'Member')}
               </span>
               {selectedClub.recruitmentOpen && (
                 <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold animate-pulse">
@@ -168,7 +181,7 @@ export const ClubsView: React.FC = () => {
             {/* Club Events */}
             {clubEvents.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3 font-heading">
                   Upcoming Club Events ({clubEvents.length})
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -176,12 +189,14 @@ export const ClubsView: React.FC = () => {
                     <div
                       key={ev.id}
                       onClick={() => setSelectedEventId(ev.id)}
-                      className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/50 dark:border-zinc-700/50 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-3"
+                      className="p-3.5 rounded-2xl bg-zinc-100/70 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/50 cursor-pointer hover:bg-zinc-200/70 dark:hover:bg-zinc-700/50 transition-all flex items-center gap-3"
                     >
-                      <img src={ev.posterUrl} alt={ev.title} className="w-12 h-12 rounded-xl object-cover" />
+                      <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                        <LazyImage src={ev.posterUrl} alt={ev.title} fallbackText={ev.title} className="w-full h-full object-cover" />
+                      </div>
                       <div>
-                        <div className="text-xs font-bold text-zinc-900 dark:text-white">{ev.title}</div>
-                        <div className="text-[11px] text-zinc-400">{ev.date} • {ev.venue}</div>
+                        <div className="text-xs font-bold text-zinc-900 dark:text-white font-heading">{ev.title}</div>
+                        <div className="text-[11px] text-zinc-400">{formatHumanDate(ev.date, ev.startTime)} • {ev.venue}</div>
                       </div>
                     </div>
                   ))}
@@ -192,17 +207,17 @@ export const ClubsView: React.FC = () => {
             {/* Club Announcements */}
             {selectedClub.announcements.length > 0 && (
               <div>
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3 font-heading">
                   Official Club Notice Board
                 </h3>
                 <div className="flex flex-col gap-2.5">
                   {selectedClub.announcements.map(ann => (
-                    <div key={ann.id} className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20">
+                    <div key={ann.id} className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{ann.title}</span>
+                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 font-heading">{ann.title}</span>
                         <span className="text-[10px] text-zinc-400">{ann.date}</span>
                       </div>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-300">{ann.content}</p>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">{ann.content}</p>
                     </div>
                   ))}
                 </div>
@@ -215,7 +230,7 @@ export const ClubsView: React.FC = () => {
       {/* Directory Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
+          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight font-heading">
             SSPU Clubs & Societies
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -229,8 +244,8 @@ export const ClubsView: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search clubs..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Search clubs or teams..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass-panel text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
       </div>
@@ -244,7 +259,7 @@ export const ClubsView: React.FC = () => {
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeCategory === cat
                 ? 'sw-gradient-bg text-white shadow-md'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                : 'glass-panel text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             {cat}
@@ -258,14 +273,19 @@ export const ClubsView: React.FC = () => {
           return (
             <div
               key={club.id}
-              className="bg-white dark:bg-zinc-900/70 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col justify-between group"
+              className="glass-panel spotlight-card rounded-3xl border border-white/20 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
             >
               {/* Card Banner */}
               <div 
                 className="relative h-28 w-full overflow-hidden cursor-pointer"
                 onClick={() => setSelectedClubId(club.id)}
               >
-                <img src={club.bannerUrl} alt={club.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <LazyImage 
+                  src={club.bannerUrl} 
+                  alt={club.name} 
+                  fallbackText={club.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {club.recruitmentOpen && (
                   <span className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-black uppercase tracking-wider shadow">
@@ -278,20 +298,25 @@ export const ClubsView: React.FC = () => {
               <div className="p-4 relative flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-3 -mt-10 mb-2">
-                    <img
-                      src={club.logoUrl}
-                      alt={club.name}
+                    <div 
                       onClick={() => setSelectedClubId(club.id)}
-                      className="w-14 h-14 rounded-2xl object-cover ring-4 ring-white dark:ring-zinc-900 shadow-md cursor-pointer"
-                    />
-                    <div className="mt-4">
+                      className="w-14 h-14 rounded-2xl overflow-hidden ring-4 ring-white dark:ring-zinc-900 shadow-md cursor-pointer flex-shrink-0"
+                    >
+                      <LazyImage
+                        src={club.logoUrl}
+                        alt={club.name}
+                        fallbackText={club.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-4 min-w-0">
                       <h4 
                         onClick={() => setSelectedClubId(club.id)}
-                        className="text-sm font-bold text-zinc-900 dark:text-white leading-tight hover:text-purple-600 cursor-pointer"
+                        className="text-sm font-bold text-zinc-900 dark:text-white leading-tight hover:text-purple-600 cursor-pointer font-heading truncate"
                       >
                         {club.name}
                       </h4>
-                      <span className="text-[11px] text-zinc-400 font-mono">{club.handle}</span>
+                      <span className="text-[11px] text-zinc-400 font-mono truncate block">{club.handle}</span>
                     </div>
                   </div>
 
@@ -299,7 +324,7 @@ export const ClubsView: React.FC = () => {
                     {club.category}
                   </span>
 
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3 leading-relaxed">
                     {club.description}
                   </p>
                 </div>
@@ -342,7 +367,7 @@ export const ClubsView: React.FC = () => {
       {/* Recruitment In-App Application Modal */}
       {showApplyModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-md w-full p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl relative">
+          <div className="glass-dropdown rounded-3xl max-w-md w-full p-6 border border-white/20 dark:border-white/10 shadow-2xl relative text-zinc-900 dark:text-zinc-100">
             <button
               onClick={() => setShowApplyModal(null)}
               className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 dark:hover:text-white"
@@ -351,10 +376,12 @@ export const ClubsView: React.FC = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <img src={showApplyModal.logoUrl} alt={showApplyModal.name} className="w-12 h-12 rounded-2xl object-cover" />
+              <div className="w-12 h-12 rounded-2xl overflow-hidden">
+                <LazyImage src={showApplyModal.logoUrl} alt={showApplyModal.name} fallbackText={showApplyModal.name} className="w-full h-full object-cover" />
+              </div>
               <div>
                 <span className="text-[10px] font-black uppercase text-pink-500">Recruitment Application</span>
-                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white">{showApplyModal.name}</h3>
+                <h3 className="text-base font-extrabold font-heading">{showApplyModal.name}</h3>
                 <span className="text-xs text-zinc-500">Open Role: {showApplyModal.recruitmentRole}</span>
               </div>
             </div>
@@ -370,7 +397,7 @@ export const ClubsView: React.FC = () => {
                   value={applyReason}
                   onChange={(e) => setApplyReason(e.target.value)}
                   placeholder="Tell the leads about your projects, skills, or what you'd like to contribute..."
-                  className="w-full p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full p-3 rounded-2xl bg-zinc-100/70 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
