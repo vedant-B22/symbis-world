@@ -411,6 +411,8 @@ export const CURRENT_USER: User = {
   followersCount: 384,
   followingCount: 295,
   eventsAttendedCount: 14,
+  streakDays: 14,
+  xp: 1850,
   isPrivate: false,
   hideEventsAttended: false
 };

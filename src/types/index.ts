@@ -17,6 +17,8 @@ export interface User {
   followersCount: number;
   followingCount: number;
   eventsAttendedCount: number;
+  streakDays?: number;
+  xp?: number;
   isPrivate?: boolean;
   hideEventsAttended?: boolean;
   administeredClubId?: string;

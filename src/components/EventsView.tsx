@@ -151,10 +151,10 @@ END:VCALENDAR`;
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeCategory === cat.id
-                  ? 'sw-gradient-bg text-white shadow-md'
-                  : 'glass-panel text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  ? 'bg-[var(--brand-primary)] text-white shadow-md shadow-[var(--brand-primary)]/20'
+                  : 'glass-panel text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
               {cat.label}

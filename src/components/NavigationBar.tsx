@@ -89,21 +89,21 @@ export const NavigationBar: React.FC = () => {
                   onClick={() => setActiveTab(item.id as any)}
                   className={`flex items-center gap-3.5 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all relative group ${
                     isActive
-                      ? 'bg-purple-600/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 shadow-xs'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100'
+                      ? 'bg-[var(--brand-primary)] text-white shadow-md shadow-[var(--brand-primary)]/20'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
                   {Icon ? (
                     <div className="relative">
-                      <Icon className={`w-4 h-4 transition-transform ${isActive ? 'scale-110 text-purple-600 dark:text-purple-400' : 'group-hover:scale-105'}`} />
+                      <Icon className={`w-4 h-4 transition-transform ${isActive ? 'scale-110 text-white' : 'text-zinc-500 dark:text-zinc-400 group-hover:scale-105 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'}`} />
                       {item.count ? (
-                        <span className="absolute -top-1.5 -right-2 bg-pink-500 text-white text-[9px] font-black rounded-full h-3.5 min-w-3.5 px-1 flex items-center justify-center">
+                        <span className="absolute -top-1.5 -right-2 bg-[var(--brand-coral)] text-white text-[9px] font-black rounded-full h-3.5 min-w-3.5 px-1 flex items-center justify-center shadow-xs">
                           {item.count}
                         </span>
                       ) : null}
                     </div>
                   ) : item.avatar ? (
-                    <div className="w-5 h-5 rounded-full overflow-hidden ring-2 ring-purple-500/50">
+                    <div className="w-5 h-5 rounded-full overflow-hidden ring-2 ring-[var(--brand-primary)]">
                       <LazyImage
                         src={item.avatar} 
                         alt="Profile" 
@@ -116,7 +116,7 @@ export const NavigationBar: React.FC = () => {
                   <span className="flex-1 text-left">{item.label}</span>
 
                   {item.badge && (
-                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs">
+                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--brand-coral)] text-white shadow-xs">
                       {item.badge}
                     </span>
                   )}
@@ -130,8 +130,8 @@ export const NavigationBar: React.FC = () => {
                 onClick={() => setActiveTab('club_admin')}
                 className={`flex items-center gap-3.5 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all mt-1 ${
                   activeTab === 'club_admin'
-                    ? 'bg-blue-600/15 text-blue-600 dark:text-blue-400'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
                 }`}
               >
                 <Briefcase className="w-4 h-4 text-blue-500" />
@@ -144,8 +144,8 @@ export const NavigationBar: React.FC = () => {
                 onClick={() => setActiveTab('admin')}
                 className={`flex items-center gap-3.5 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all mt-1 ${
                   activeTab === 'admin'
-                    ? 'bg-rose-600/15 text-rose-600 dark:text-rose-400'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40'
+                    ? 'bg-rose-600 text-white shadow-md'
+                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
                 }`}
               >
                 <ShieldAlert className="w-4 h-4 text-rose-500" />
@@ -156,7 +156,7 @@ export const NavigationBar: React.FC = () => {
             {/* Create Post Action Button */}
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="mt-2.5 flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl sw-gradient-bg text-white font-bold text-xs shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="mt-2.5 flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl sw-gradient-bg text-white font-bold text-xs shadow-lg shadow-[var(--brand-primary)]/25 hover:shadow-[var(--brand-primary)]/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <PlusSquare className="w-4 h-4" />
               <span>Create Post / Story</span>
@@ -239,7 +239,7 @@ export const NavigationBar: React.FC = () => {
         <button
           onClick={() => setActiveTab('feed')}
           className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'feed' ? 'text-purple-600 dark:text-purple-400 scale-110' : 'text-zinc-400 dark:text-zinc-500'
+            activeTab === 'feed' ? 'text-[var(--brand-primary)] scale-110 font-bold' : 'text-zinc-500 dark:text-zinc-400'
           }`}
         >
           <Home className="w-4 h-4" />
@@ -249,17 +249,17 @@ export const NavigationBar: React.FC = () => {
         <button
           onClick={() => setActiveTab('events')}
           className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${
-            activeTab === 'events' ? 'text-purple-600 dark:text-purple-400 scale-110' : 'text-zinc-400 dark:text-zinc-500'
+            activeTab === 'events' ? 'text-[var(--brand-primary)] scale-110 font-bold' : 'text-zinc-500 dark:text-zinc-400'
           }`}
         >
           <Calendar className="w-4 h-4" />
           <span className="text-[9px] font-semibold mt-0.5">Events</span>
-          <span className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-pink-500"></span>
+          <span className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-[var(--brand-coral)]"></span>
         </button>
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center justify-center -mt-5 w-11 h-11 rounded-2xl sw-gradient-bg text-white shadow-lg shadow-purple-500/40 active:scale-95 transition-transform"
+          className="flex items-center justify-center -mt-5 w-11 h-11 rounded-2xl sw-gradient-bg text-white shadow-lg shadow-[var(--brand-primary)]/40 active:scale-95 transition-transform"
         >
           <PlusSquare className="w-5 h-5" />
         </button>
@@ -267,7 +267,7 @@ export const NavigationBar: React.FC = () => {
         <button
           onClick={() => setActiveTab('clubs')}
           className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'clubs' ? 'text-purple-600 dark:text-purple-400 scale-110' : 'text-zinc-400 dark:text-zinc-500'
+            activeTab === 'clubs' ? 'text-[var(--brand-primary)] scale-110 font-bold' : 'text-zinc-500 dark:text-zinc-400'
           }`}
         >
           <Users2 className="w-4 h-4" />
@@ -286,12 +286,12 @@ export const NavigationBar: React.FC = () => {
               alt="Profile" 
               fallbackText={currentUser.name}
               className={`w-full h-full object-cover ring-2 ${
-                activeTab === 'profile' ? 'ring-purple-600' : 'ring-transparent opacity-75'
+                activeTab === 'profile' ? 'ring-[var(--brand-primary)]' : 'ring-transparent opacity-75'
               }`} 
             />
           </div>
           <span className={`text-[9px] font-semibold mt-0.5 ${
-            activeTab === 'profile' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-400 dark:text-zinc-500'
+            activeTab === 'profile' ? 'text-[var(--brand-primary)] font-bold' : 'text-zinc-500 dark:text-zinc-400'
           }`}>
             Profile
           </span>
